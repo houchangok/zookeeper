@@ -18,6 +18,8 @@
 
 package org.apache.jute;
 
+import org.apache.zookeeper.proto.ConnectResponse;
+
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -29,6 +31,8 @@ import java.io.InputStream;
 public class BinaryInputArchive implements InputArchive {
     static public final String UNREASONBLE_LENGTH= "Unreasonable length = ";
     private DataInput in;
+
+//    ConnectResponse connectResponse = new ConnectResponse();
     
     static public BinaryInputArchive getArchive(InputStream strm) {
         return new BinaryInputArchive(new DataInputStream(strm));
@@ -52,6 +56,7 @@ public class BinaryInputArchive implements InputArchive {
     }
     
     public byte readByte(String tag) throws IOException {
+//        connectResponse.setTimeOut(10000);
         return in.readByte();
     }
     

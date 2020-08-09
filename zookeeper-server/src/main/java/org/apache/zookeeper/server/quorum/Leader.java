@@ -404,6 +404,10 @@ public class Leader implements LearnerMaster {
     // VisibleForTesting
     protected final Proposal newLeaderProposal = new Proposal();
 
+    /**
+     * 当 Leader 机器启动成功后，Follow 节点的机器会收到来自 Leader 节点的启动通知。
+     * 而该通知则是通过 LearnerCnxAcceptor 类来实现的
+     */
     class LearnerCnxAcceptor extends ZooKeeperCriticalThread {
         private volatile boolean stop = false;
 
@@ -426,6 +430,7 @@ public class Leader implements LearnerMaster {
                         s.setSoTimeout(self.tickTime * self.initLimit);
                         s.setTcpNoDelay(nodelay);
 
+                        //获取服务端的同步数据信息
                         BufferedInputStream is = new BufferedInputStream(
                                 s.getInputStream());
                         LearnerHandler fh = new LearnerHandler(s, is, Leader.this);

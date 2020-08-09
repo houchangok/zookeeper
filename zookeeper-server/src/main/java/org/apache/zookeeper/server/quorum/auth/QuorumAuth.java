@@ -90,6 +90,7 @@ public class QuorumAuth {
         BinaryInputArchive bia = new BinaryInputArchive(din);
         boolean firstIsAuth = (bia.readLong("NO_TAG")
                                == QuorumAuth.QUORUM_AUTH_MAGIC_NUMBER);
+       //重置流的作用是什么 TODO
         din.reset();
         return firstIsAuth;
     }
