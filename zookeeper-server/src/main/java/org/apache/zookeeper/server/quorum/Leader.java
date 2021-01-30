@@ -701,6 +701,7 @@ public class Leader implements LearnerMaster {
                     }
                     tickSkip = !tickSkip;
                 }
+                //向其它所有的Follower节点发送心跳包
                 for (LearnerHandler f : getLearners()) {
                     f.ping();
                 }

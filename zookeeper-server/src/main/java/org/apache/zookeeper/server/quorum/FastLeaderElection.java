@@ -730,6 +730,7 @@ public class FastLeaderElection implements Election {
     protected boolean totalOrderPredicate(long newId, long newZxid, long newEpoch, long curId, long curZxid, long curEpoch) {
         LOG.debug("id: " + newId + ", proposed id: " + curId + ", zxid: 0x" +
                 Long.toHexString(newZxid) + ", proposed zxid: 0x" + Long.toHexString(curZxid));
+        //weight是干啥用的 TODO
         if(self.getQuorumVerifier().getWeight(newId) == 0){
             return false;
         }
@@ -930,6 +931,7 @@ public class FastLeaderElection implements Election {
 
             LOG.info("New election. My id =  " + self.getId() +
                     ", proposed zxid=0x" + Long.toHexString(proposedZxid));
+            //将自己的选票发送给集群中的所有节点，包括节点本身
             sendNotifications();
 
             SyncedLearnerTracker voteSet;
@@ -994,6 +996,7 @@ public class FastLeaderElection implements Election {
                                         getPeerEpoch());
                             }
                             sendNotifications();
+                            //接收到的epoch小于当前节点的epoch,则直接忽略该投票
                         } else if (n.electionEpoch < logicalclock.get()) {
                             if(LOG.isDebugEnabled()){
                                 LOG.debug("Notification election epoch is smaller than logicalclock. n.electionEpoch = 0x"
@@ -1001,9 +1004,12 @@ public class FastLeaderElection implements Election {
                                         + ", logicalclock=0x" + Long.toHexString(logicalclock.get()));
                             }
                             break;
+                            //PK选票，并更新当前节点的选票信息，发送给其它节点，依次按照epoch-->zxid-->myid进行PK
                         } else if (totalOrderPredicate(n.leader, n.zxid, n.peerEpoch,
                                 proposedLeader, proposedZxid, proposedEpoch)) {
+                            //更新当前选票
                             updateProposal(n.leader, n.zxid, n.peerEpoch);
+                            //发送给集群中的所有节点
                             sendNotifications();
                         }
 

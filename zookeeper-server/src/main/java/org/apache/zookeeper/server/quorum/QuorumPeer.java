@@ -900,6 +900,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
         if (!getView().containsKey(myid)) {
             throw new RuntimeException("My id " + myid + " not in the peer list");
          }
+        //加载数据到内存
         loadDataBase();
         startServerCnxnFactory();
         try {
@@ -964,6 +965,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
     synchronized public void startLeaderElection() {
         try {
             if (getPeerState() == ServerState.LOOKING) {
+                //初始化当前选票
                 currentVote = new Vote(myid, getLastLoggedZxid(), getCurrentEpoch());
             }
         } catch(IOException e) {
@@ -971,7 +973,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
             re.setStackTrace(e.getStackTrace());
             throw re;
         }
-
+        //electionType=3,使用FastLeaderElection算法
         this.electionAlg = createElectionAlgorithm(electionType);
     }
 
@@ -1129,7 +1131,10 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
     }
 
     boolean shuttingDownLE = false;
-    
+
+    /**
+     * 选举的关键逻辑 run方法  TODO
+     */
     @Override
     public void run() {
         updateThreadName();
@@ -1221,6 +1226,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                     } else {
                         try {
                            reconfigFlagClear();
+                           //一般不会走这个if逻辑
                             if (shuttingDownLE) {
                                shuttingDownLE = false;
                                startLeaderElection();
@@ -1277,6 +1283,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                             leader.shutdown("Forcing shutdown");
                             setLeader(null);
                         }
+                        //更新节点选举状态
                         updateServerState();
                     }
                     break;
@@ -1300,6 +1307,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
     }
 
     private synchronized void updateServerState(){
+        //当感知leader节点挂掉了，则将当前节点的集群状态设置为Looking状态，进入下一轮集群选举过程
        if (!reconfigFlag) {
            setPeerState(ServerState.LOOKING);
            LOG.warn("PeerState set to LOOKING");

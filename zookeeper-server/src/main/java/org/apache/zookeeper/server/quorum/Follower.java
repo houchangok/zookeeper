@@ -79,6 +79,7 @@ public class Follower extends Learner{
         try {
             QuorumServer leaderServer = findLeader();
             try {
+                //和leader节点建立socket连接
                 connectToLeader(leaderServer.addr, leaderServer.hostname);
                 long newEpochZxid = registerWithLeader(Leader.FOLLOWERINFO);
                 if (self.isReconfigStateChange())
@@ -93,6 +94,7 @@ public class Follower extends Learner{
                 }
                 long startTime = Time.currentElapsedTime();
                 try {
+                    //和leader节点同步数据
                     syncWithLeader(newEpochZxid);
                 } finally {
                     long syncTime = Time.currentElapsedTime() - startTime;
@@ -108,6 +110,7 @@ public class Follower extends Learner{
                 }
                 // create a reusable packet to reduce gc impact
                 QuorumPacket qp = new QuorumPacket();
+                //出现异常，则退出while循环
                 while (this.isRunning()) {
                     readPacket(qp);
                     processPacket(qp);

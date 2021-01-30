@@ -38,6 +38,7 @@ public class SendAckRequestProcessor implements RequestProcessor, Flushable {
     }
 
     public void processRequest(Request si) {
+        //这个地方的判断是不是有点问题 TODO
         if(si.type != OpCode.sync){
             QuorumPacket qp = new QuorumPacket(Leader.ACK, si.getHdr().getZxid(), null,
                 null);
